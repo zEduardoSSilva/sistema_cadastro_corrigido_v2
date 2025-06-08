@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}Sistema de Cadastro - Erro 404{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 mx-auto text-center">
+            <div class="card shadow border-danger">
+                <div class="card-body py-5">
+                    <h1 class="display-1 text-danger mb-4">
+                        <i class="fas fa-exclamation-triangle"></i> 404
+                    </h1>
+                    <h2 class="mb-4">Página não encontrada</h2>
+                    <p class="lead mb-4">Ops! A página que você está procurando parece ter se perdido no banco de dados.</p>
+                    <p class="mb-4">Talvez ela tenha sido excluída, renomeada ou esteja temporariamente indisponível.</p>
+                    <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+                        <a href="{{ url_for('index') }}" class="btn btn-primary btn-lg px-4 gap-3">
+                            <i class="fas fa-home me-2"></i>Voltar para o Início
+                        </a>
+                        <button onclick="history.back()" class="btn btn-outline-secondary btn-lg px-4">
+                            <i class="fas fa-arrow-left me-2"></i>Voltar
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Dica Humorística -->
+            <div class="card mt-4 border-info">
+                <div class="card-body">
+                    <div class="d-flex">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-lightbulb text-warning fa-2x"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3 text-start">
+                            <h5 class="card-title">Dica do Assistente</h5>
+                            <p class="card-text">Páginas 404 são como meias perdidas na lavanderia - ninguém sabe para onde foram, mas temos certeza que estavam aqui há pouco tempo! 🧦</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

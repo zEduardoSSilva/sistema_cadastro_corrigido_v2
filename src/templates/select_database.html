@@ -1,0 +1,236 @@
+{% extends 'base.html' %}
+
+{% block title %}Sistema de Cadastro - Conexão com Banco de Dados{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-database me-2"></i>Conexão com Banco de Dados</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i> Selecione o arquivo do banco de dados Access (.accdb ou .mdb) para começar.
+                        <p class="small mb-0 mt-1">O caminho será salvo para acessos futuros.</p>
+                    </div>
+
+                    <!-- Status de Conexão -->
+                    <div class="connection-status mb-4">
+                        <div class="d-flex align-items-center">
+                            <div class="status-indicator me-3 {% if connection_status.status %}bg-success{% else %}bg-danger{% endif %}">
+                                <i class="fas {% if connection_status.status %}fa-check{% else %}fa-times{% endif %}"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-1">Status da Conexão</h5>
+                                <p class="mb-0 text-{% if connection_status.status %}success{% else %}danger{% endif %}">
+                                    {{ connection_status.message }}
+                                </p>
+                                {% if db_path %}
+                                <p class="text-muted small mb-0">Caminho: {{ db_path }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Formulário de Upload -->
+                    <form id="databaseForm" enctype="multipart/form-data" class="mb-4">
+                        <div class="mb-3">
+                            <label for="databaseFile" class="form-label">Arquivo do Banco de Dados</label>
+                            <div class="input-group">
+                                <input type="file" class="form-control" id="databaseFile" name="database_file" accept=".accdb,.mdb">
+                                <button class="btn btn-primary" type="submit" id="uploadBtn">
+                                    <i class="fas fa-upload me-1"></i> Enviar
+                                </button>
+                            </div>
+                            <div class="form-text">Selecione um arquivo .accdb ou .mdb</div>
+                        </div>
+                    </form>
+
+                    <!-- Caminho Manual -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0"><i class="fas fa-folder-open me-2"></i>Ou informe o caminho manualmente</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="manualPath" placeholder="C:\Caminho\Para\Banco.accdb">
+                                <button class="btn btn-outline-primary" type="button" id="setPathBtn">
+                                    <i class="fas fa-save me-1"></i> Definir
+                                </button>
+                            </div>
+                            <div class="form-text">Útil quando o banco está em uma pasta compartilhada ou no OneDrive</div>
+                        </div>
+                    </div>
+
+                    <!-- Botões de Ação -->
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <button class="btn btn-outline-secondary me-md-2" type="button" id="testConnectionBtn">
+                            <i class="fas fa-sync-alt me-1"></i> Testar Conexão
+                        </button>
+                        <a href="{{ url_for('index') }}" class="btn btn-success" id="continueBtn">
+                            <i class="fas fa-arrow-right me-1"></i> Continuar para o Sistema
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dica Humorística -->
+            <div class="card mt-4 border-info shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-lightbulb text-warning fa-2x"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h5 class="card-title">Dica do Dia</h5>
+                            <p class="card-text">Bancos de dados são como gatos: às vezes cooperam, às vezes ignoram você completamente. Se a conexão falhar, tente fazer carinho no seu arquivo .accdb! 😺</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        // Envio do formulário de upload
+        $('#databaseForm').on('submit', function(e) {
+            e.preventDefault();
+            
+            var formData = new FormData(this);
+            
+            $.ajax({
+                url: '{{ url_for("select_database") }}',
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                beforeSend: function() {
+                    $('#uploadBtn').html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Enviando...');
+                    $('#uploadBtn').prop('disabled', true);
+                },
+                success: function(response) {
+                    if (response.status) {
+                        showToast('Sucesso!', 'Banco de dados configurado com sucesso.', 'success');
+                        updateConnectionStatus(response.connection_status);
+                    } else {
+                        showToast('Erro!', response.message, 'danger');
+                    }
+                },
+                error: function() {
+                    showToast('Erro!', 'Ocorreu um erro ao processar sua solicitação.', 'danger');
+                },
+                complete: function() {
+                    $('#uploadBtn').html('<i class="fas fa-upload me-1"></i> Enviar');
+                    $('#uploadBtn').prop('disabled', false);
+                }
+            });
+        });
+
+        // Definir caminho manualmente
+        $('#setPathBtn').on('click', function() {
+            var path = $('#manualPath').val().trim();
+            
+            if (!path) {
+                showToast('Atenção!', 'Por favor, informe um caminho válido.', 'warning');
+                return;
+            }
+            
+            $.ajax({
+                url: '{{ url_for("set_database_path") }}',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ db_path: path }),
+                beforeSend: function() {
+                    $('#setPathBtn').html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processando...');
+                    $('#setPathBtn').prop('disabled', true);
+                },
+                success: function(response) {
+                    if (response.status) {
+                        showToast('Sucesso!', 'Caminho configurado com sucesso.', 'success');
+                        updateConnectionStatus(response.connection_status);
+                    } else {
+                        showToast('Erro!', response.message, 'danger');
+                    }
+                },
+                error: function() {
+                    showToast('Erro!', 'Ocorreu um erro ao processar sua solicitação.', 'danger');
+                },
+                complete: function() {
+                    $('#setPathBtn').html('<i class="fas fa-save me-1"></i> Definir');
+                    $('#setPathBtn').prop('disabled', false);
+                }
+            });
+        });
+
+        // Testar conexão
+        $('#testConnectionBtn').on('click', function() {
+            $.ajax({
+                url: '{{ url_for("check_connection") }}',
+                type: 'GET',
+                beforeSend: function() {
+                    $('#testConnectionBtn').html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Testando...');
+                    $('#testConnectionBtn').prop('disabled', true);
+                },
+                success: function(response) {
+                    updateConnectionStatus(response);
+                },
+                error: function() {
+                    showToast('Erro!', 'Ocorreu um erro ao testar a conexão.', 'danger');
+                },
+                complete: function() {
+                    $('#testConnectionBtn').html('<i class="fas fa-sync-alt me-1"></i> Testar Conexão');
+                    $('#testConnectionBtn').prop('disabled', false);
+                }
+            });
+        });
+
+        // Função para atualizar o status da conexão
+        function updateConnectionStatus(status) {
+            var indicator = $('.status-indicator');
+            var statusText = $('.status-indicator + div p:first-child');
+            
+            if (status.status) {
+                indicator.removeClass('bg-danger').addClass('bg-success');
+                indicator.find('i').removeClass('fa-times').addClass('fa-check');
+                statusText.removeClass('text-danger').addClass('text-success');
+            } else {
+                indicator.removeClass('bg-success').addClass('bg-danger');
+                indicator.find('i').removeClass('fa-check').addClass('fa-times');
+                statusText.removeClass('text-success').addClass('text-danger');
+            }
+            
+            statusText.text(status.message);
+        }
+
+        // Função para exibir toast
+        function showToast(title, message, type) {
+            var toast = `
+                <div class="toast align-items-center text-white bg-${type} border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            <strong>${title}</strong> ${message}
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                </div>
+            `;
+            
+            $('.toast-container').append(toast);
+            var toastEl = $('.toast').last();
+            var bsToast = new bootstrap.Toast(toastEl, { autohide: true, delay: 5000 });
+            bsToast.show();
+            
+            // Remover toast após fechamento
+            toastEl.on('hidden.bs.toast', function() {
+                $(this).remove();
+            });
+        }
+    });
+</script>
+{% endblock %}

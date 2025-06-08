@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+
+{% block title %}Sistema de Cadastro - Bruto - Formulário{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Cabeçalho da Página -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2>
+                <i class="fas fa-chart-line me-2"></i>
+                {% if registro.id %}Editar{% else %}Novo{% endif %} Registro de Bruto
+            </h2>
+            <p class="text-muted">
+                {% if registro.id %}Edite os dados do registro existente.{% else %}Preencha os dados para criar um novo registro.{% endif %}
+            </p>
+        </div>
+    </div>
+
+    <!-- Formulário -->
+    <div class="card shadow">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">
+                <i class="fas fa-edit me-2"></i>Formulário de Bruto
+            </h5>
+        </div>
+        <div class="card-body">
+            <form method="POST" id="formBruto">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="data" class="form-label required">Data</label>
+                        <input type="date" class="form-control" id="data" name="data" value="{{ registro.data }}" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="regiao" class="form-label required">Região</label>
+                        <select class="form-select" id="regiao" name="regiao" required>
+                            <option value="" {% if not registro.regiao %}selected{% endif %}>Selecione...</option>
+                            <option value="Sul" {% if registro.regiao == 'Sul' %}selected{% endif %}>Sul</option>
+                            <option value="Sudeste" {% if registro.regiao == 'Sudeste' %}selected{% endif %}>Sudeste</option>
+                            <option value="Centro-Oeste" {% if registro.regiao == 'Centro-Oeste' %}selected{% endif %}>Centro-Oeste</option>
+                            <option value="Nordeste" {% if registro.regiao == 'Nordeste' %}selected{% endif %}>Nordeste</option>
+                            <option value="Norte" {% if registro.regiao == 'Norte' %}selected{% endif %}>Norte</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="valor" class="form-label required">Valor</label>
+                        <div class="input-group">
+                            <span class="input-group-text">R$</span>
+                            <input type="number" class="form-control" id="valor" name="valor" min="0" step="0.01" value="{{ registro.valor }}" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="status" class="form-label required">Status</label>
+                        <select class="form-select" id="status" name="status" required>
+                            <option value="" {% if not registro.status %}selected{% endif %}>Selecione...</option>
+                            <option value="Ativo" {% if registro.status == 'Ativo' %}selected{% endif %}>Ativo</option>
+                            <option value="Inativo" {% if registro.status == 'Inativo' %}selected{% endif %}>Inativo</option>
+                            <option value="Pendente" {% if registro.status == 'Pendente' %}selected{% endif %}>Pendente</option>
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <label for="observacoes" class="form-label">Observações</label>
+                        <textarea class="form-control" id="observacoes" name="observacoes" rows="3">{{ registro.observacoes }}</textarea>
+                    </div>
+                    <div class="col-12 mt-4">
+                        <div class="d-flex justify-content-end">
+                            <a href="{{ url_for('bruto_bp.index') }}" class="btn btn-outline-secondary me-2">
+                                <i class="fas fa-times me-1"></i>Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i>Salvar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Dica Humorística -->
+    <div class="card border-info shadow-sm mt-4">
+        <div class="card-body">
+            <div class="d-flex">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-lightbulb text-warning fa-2x"></i>
+                </div>
+                <div class="flex-grow-1 ms-3">
+                    <h5 class="card-title">Dica do Assistente</h5>
+                    <p class="card-text">
+                        Preencher formulários é como fazer um sanduíche: quanto mais cuidado você tiver com os ingredientes (dados), 
+                        mais saboroso (útil) será o resultado final! Não economize nas informações! 🥪
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        // Validação do formulário
+        $('#formBruto').submit(function(e) {
+            const camposObrigatorios = ['data', 'regiao', 'valor', 'status'];
+            let formValido = true;
+            
+            camposObrigatorios.forEach(campo => {
+                const elemento = $(`#${campo}`);
+                if (!elemento.val()) {
+                    elemento.addClass('is-invalid');
+                    formValido = false;
+                } else {
+                    elemento.removeClass('is-invalid');
+                }
+            });
+            
+            if (!formValido) {
+                e.preventDefault();
+                showToast('Atenção', 'Por favor, preencha todos os campos obrigatórios.', 'warning');
+            }
+        });
+    });
+</script>
+{% endblock %}

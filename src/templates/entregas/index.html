@@ -1,0 +1,197 @@
+{% extends 'base.html' %}
+
+{% block title %}Sistema de Cadastro - Dados Bruto{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Cabeçalho da Página -->
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            <h2><i class="fas fa-chart-line me-2"></i>Gerenciamento de Dados Bruto</h2>
+            <p class="text-muted">Cadastre e gerencie os dados de bruto do sistema.</p>
+        </div>
+        <div class="col-lg-4 text-lg-end">
+            <a href="{{ url_for('bruto_bp.novo') }}" class="btn btn-primary">
+                <i class="fas fa-plus-circle me-1"></i>Novo Registro
+            </a>
+        </div>
+    </div>
+
+    <!-- Filtros de Busca -->
+    <div class="card shadow mb-4">
+        <div class="card-header bg-light">
+            <h5 class="mb-0"><i class="fas fa-filter me-2"></i>Filtros</h5>
+        </div>
+        <div class="card-body">
+            <form id="formFiltros" class="row g-3">
+                <div class="col-md-4">
+                    <label for="filtroData" class="form-label">Data</label>
+                    <input type="date" class="form-control" id="filtroData">
+                </div>
+                <div class="col-md-4">
+                    <label for="filtroRegiao" class="form-label">Região</label>
+                    <select class="form-select" id="filtroRegiao">
+                        <option value="">Todas</option>
+                        <option value="Sul">Sul</option>
+                        <option value="Sudeste">Sudeste</option>
+                        <option value="Centro-Oeste">Centro-Oeste</option>
+                        <option value="Nordeste">Nordeste</option>
+                        <option value="Norte">Norte</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label for="filtroValor" class="form-label">Valor Mínimo</label>
+                    <input type="number" class="form-control" id="filtroValor" min="0" step="0.01">
+                </div>
+                <div class="col-12 text-end">
+                    <button type="button" class="btn btn-outline-secondary me-2" id="btnLimparFiltros">
+                        <i class="fas fa-eraser me-1"></i>Limpar
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search me-1"></i>Filtrar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Tabela de Dados -->
+    <div class="card shadow">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="fas fa-table me-2"></i>Registros</h5>
+            <div>
+                <button class="btn btn-sm btn-outline-primary me-2" id="btnExportar">
+                    <i class="fas fa-file-export me-1"></i>Exportar
+                </button>
+                <button class="btn btn-sm btn-outline-secondary" id="btnImprimir">
+                    <i class="fas fa-print me-1"></i>Imprimir
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Data</th>
+                            <th>Região</th>
+                            <th>Valor</th>
+                            <th>Observações</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if dados %}
+                            {% for item in dados %}
+                                <tr>
+                                    <td>{{ item.id }}</td>
+                                    <td>{{ item.data }}</td>
+                                    <td>{{ item.regiao }}</td>
+                                    <td>{{ item.valor }}</td>
+                                    <td>{{ item.observacoes }}</td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="{{ url_for('bruto_bp.editar', id=item.id) }}" class="btn btn-outline-primary">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <button type="button" class="btn btn-outline-danger btn-excluir" data-id="{{ item.id }}">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center py-4">
+                                    <div class="alert alert-info mb-0">
+                                        <i class="fas fa-info-circle me-2"></i>Nenhum registro encontrado.
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Paginação -->
+            <nav aria-label="Navegação de página" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Anterior</a>
+                    </li>
+                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                    <li class="page-item"><a class="page-link" href="#">2</a></li>
+                    <li class="page-item"><a class="page-link" href="#">3</a></li>
+                    <li class="page-item">
+                        <a class="page-link" href="#">Próximo</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Confirmação de Exclusão -->
+<div class="modal fade" id="modalExcluir" tabindex="-1" aria-labelledby="modalExcluirLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="modalExcluirLabel">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Confirmar Exclusão
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <p>Tem certeza que deseja excluir este registro? Esta ação não pode ser desfeita.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form id="formExcluir" method="POST">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash me-1"></i>Excluir
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        // Evento de exclusão
+        $('.btn-excluir').click(function() {
+            const id = $(this).data('id');
+            $('#formExcluir').attr('action', `{{ url_for('bruto_bp.excluir', id=0) }}`.replace('0', id));
+            $('#modalExcluir').modal('show');
+        });
+        
+        // Evento de limpar filtros
+        $('#btnLimparFiltros').click(function() {
+            $('#formFiltros')[0].reset();
+        });
+        
+        // Evento de exportar
+        $('#btnExportar').click(function() {
+            // Em um ambiente real, isso exportaria os dados para Excel/CSV
+            showToast('Exportação', 'Funcionalidade de exportação simulada com sucesso!', 'info');
+        });
+        
+        // Evento de imprimir
+        $('#btnImprimir').click(function() {
+            // Em um ambiente real, isso prepararia os dados para impressão
+            showToast('Impressão', 'Funcionalidade de impressão simulada com sucesso!', 'info');
+        });
+        
+        // Evento de filtrar
+        $('#formFiltros').submit(function(e) {
+            e.preventDefault();
+            // Em um ambiente real, isso filtraria os dados
+            showToast('Filtros', 'Filtros aplicados com sucesso!', 'success');
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+
+{% block title %}Região - Sistema de Gestão Logística{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-map-marked-alt me-2"></i>Gerenciamento de Dados por Região</h2>
+        <a href="{{ url_for('regiao_bp.novo') }}" class="btn btn-success">
+            <i class="fas fa-plus me-1"></i>Novo Registro
+        </a>
+    </div>
+    
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="fas fa-table me-2"></i>Registros por Região</h5>
+        </div>
+        <div class="card-body">
+            {% if registros %}
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Tipo</th>
+                                <th>Estado</th>
+                                <th>CD</th>
+                                <th>Data</th>
+                                <th>Mês/Ano</th>
+                                <th>Região</th>
+                                <th>Toneladas</th>
+                                <th>Devoluções</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for registro in registros %}
+                                <tr>
+                                    <td>{{ registro.tipo }}</td>
+                                    <td>{{ registro.estado }}</td>
+                                    <td>{{ registro.cd }}</td>
+                                    <td>{{ registro.data.strftime('%d/%m/%Y') }}</td>
+                                    <td>{{ registro.mes }}/{{ registro.ano }}</td>
+                                    <td>{{ registro.regiao }}</td>
+                                    <td>{% if registro.tons %}{{ "%.2f"|format(registro.tons) }}{% else %}-{% endif %}</td>
+                                    <td>
+                                        {% if registro.tons_dev_c_mot or registro.tons_dev_s_mot %}
+                                            C/M: {% if registro.tons_dev_c_mot %}{{ "%.2f"|format(registro.tons_dev_c_mot) }}{% else %}-{% endif %}<br>
+                                            S/M: {% if registro.tons_dev_s_mot %}{{ "%.2f"|format(registro.tons_dev_s_mot) }}{% else %}-{% endif %}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="{{ url_for('regiao.editar', id=registro.id) }}" class="btn btn-sm btn-primary btn-action" title="Editar">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <button type="button" class="btn btn-sm btn-danger btn-action" title="Excluir" 
+                                                    data-bs-toggle="modal" data-bs-target="#deleteModal{{ registro.id }}">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                        
+                                        <!-- Modal de confirmação de exclusão -->
+                                        <div class="modal fade" id="deleteModal{{ registro.id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ registro.id }}" aria-hidden="true">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header bg-danger text-white">
+                                                        <h5 class="modal-title" id="deleteModalLabel{{ registro.id }}">Confirmar Exclusão</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <p>Tem certeza que deseja excluir este registro?</p>
+                                                        <p><strong>Região:</strong> {{ registro.regiao }}</p>
+                                                        <p><strong>CD:</strong> {{ registro.cd }}</p>
+                                                        <p><strong>Data:</strong> {{ registro.data.strftime('%d/%m/%Y') }}</p>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                                        <form action="{{ url_for('regiao.excluir', id=registro.id) }}" method="post">
+                                                            <button type="submit" class="btn btn-danger">Confirmar Exclusão</button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>Nenhum registro encontrado. Clique em "Novo Registro" para adicionar.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0"><i class="fas fa-lightbulb me-2"></i>Dica</h5>
+        </div>
+        <div class="card-body">
+            <p class="mb-0">Os dados por região permitem analisar o desempenho logístico em diferentes áreas geográficas. Mês e ano são calculados automaticamente a partir da data selecionada. 🗺️ Mapeie seu sucesso!</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

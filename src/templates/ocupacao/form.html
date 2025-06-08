@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+
+{% block title %}Ocupação - Formulário - Sistema de Gestão Logística{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>
+            {% if registro %}
+            <i class="fas fa-edit me-2"></i>Editar Registro de Ocupação
+            {% else %}
+            <i class="fas fa-plus-circle me-2"></i>Novo Registro de Ocupação
+            {% endif %}
+        </h2>
+        <a href="{{ url_for('ocupacao_bp.index') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-1"></i>Voltar
+        </a>
+    </div>
+    
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">
+                {% if registro %}
+                <i class="fas fa-edit me-2"></i>Editar Dados
+                {% else %}
+                <i class="fas fa-plus-circle me-2"></i>Inserir Dados
+                {% endif %}
+            </h5>
+        </div>
+        <div class="card-body">
+            <form method="post" id="ocupacaoForm">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="tipo" class="form-label required-field">Tipo</label>
+                        <select class="form-select" id="tipo" name="tipo" required>
+                            <option value="" disabled selected>Selecione o tipo</option>
+                            {% for tipo in tipos %}
+                                <option value="{{ tipo }}" {% if registro and registro.tipo == tipo %}selected{% endif %}>{{ tipo }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="form-text">Tipo de registro (ex: FROTA)</div>
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        <label for="estado" class="form-label required-field">Estado</label>
+                        <select class="form-select" id="estado" name="estado" required>
+                            <option value="" disabled selected>Selecione o estado</option>
+                            {% for estado in estados %}
+                                <option value="{{ estado }}" {% if registro and registro.estado == estado %}selected{% endif %}>{{ estado }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="form-text">Estado (UF) do registro</div>
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        <label for="cd" class="form-label required-field">Centro de Distribuição</label>
+                        <select class="form-select" id="cd" name="cd" required>
+                            <option value="" disabled selected>Selecione o CD</option>
+                            {% for cd_item in cds %}
+                                <option value="{{ cd_item }}" {% if registro and registro.cd == cd_item %}selected{% endif %}>{{ cd_item }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="form-text">Centro de Distribuição</div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="data" class="form-label required-field">Data</label>
+                        <input type="date" class="form-control" id="data" name="data" 
+                               value="{{ registro.data.strftime('%Y-%m-%d') if registro else '' }}" required>
+                        <div class="form-text">Data do registro</div>
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        <label for="ocupacao" class="form-label required-field">Ocupação (%)</label>
+                        <div class="input-group">
+                            <input type="number" step="0.1" min="0" max="100" class="form-control" id="ocupacao" name="ocupacao" 
+                                   value="{{ registro.ocupacao if registro else '' }}" required>
+                            <span class="input-group-text">%</span>
+                        </div>
+                        <div class="form-text">Percentual de ocupação (0-100%)</div>
+                    </div>
+                </div>
+                
+                <div class="row mt-3">
+                    <div class="col-md-8">
+                        <label class="form-label">Visualização da Ocupação</label>
+                        <div class="progress" style="height: 30px;">
+                            <div class="progress-bar" id="ocupacao-preview" role="progressbar" style="width: 0%;" 
+                                 aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                                0%
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                    <button type="reset" class="btn btn-secondary me-md-2">
+                        <i class="fas fa-undo me-1"></i>Limpar
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i>Salvar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div class="card mt-4">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0"><i class="fas fa-lightbulb me-2"></i>Dica</h5>
+        </div>
+        <div class="card-body">
+            <p class="mb-0">Uma ocupação ideal geralmente fica entre 80% e 90%. Valores muito baixos indicam subutilização, enquanto valores muito altos podem comprometer a qualidade do serviço. 📊 Encontre o equilíbrio perfeito!</p>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    // Atualizar visualização da ocupação em tempo real
+    document.addEventListener('DOMContentLoaded', function() {
+        const ocupacaoInput = document.getElementById('ocupacao');
+        const ocupacaoPreview = document.getElementById('ocupacao-preview');
+        
+        function atualizarPreview() {
+            const valor = parseFloat(ocupacaoInput.value) || 0;
+            
+            // Limitar entre 0 e 100
+            const valorLimitado = Math.min(Math.max(valor, 0), 100);
+            
+            // Atualizar a barra de progresso
+            ocupacaoPreview.style.width = valorLimitado + '%';
+            ocupacaoPreview.textContent = valorLimitado.toFixed(1) + '%';
+            ocupacaoPreview.setAttribute('aria-valuenow', valorLimitado);
+            
+            // Mudar a cor com base no valor
+            if (valorLimitado < 50) {
+                ocupacaoPreview.className = 'progress-bar bg-warning';
+            } else if (valorLimitado < 80) {
+                ocupacaoPreview.className = 'progress-bar bg-info';
+            } else {
+                ocupacaoPreview.className = 'progress-bar bg-success';
+            }
+        }
+        
+        ocupacaoInput.addEventListener('input', atualizarPreview);
+        
+        // Inicializar com o valor atual (se existir)
+        atualizarPreview();
+    });
+</script>
+{% endblock %}
+
+{% endblock %}

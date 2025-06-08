@@ -1,0 +1,332 @@
+{% extends 'base.html' %}
+
+{% block title %}Sistema de Cadastro - Início{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Cabeçalho da Página -->
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            <h2><i class="fas fa-tachometer-alt me-2"></i>Painel de Controle</h2>
+            <p class="text-muted">Bem-vindo ao Sistema de Cadastro para o banco de dados Access.</p>
+        </div>
+        <div class="col-lg-4 text-lg-end connection-status-large">
+            <div class="alert {% if connection_status.status %}alert-success{% else %}alert-danger{% endif %} d-inline-flex align-items-center">
+                <i class="fas {% if connection_status.status %}fa-check-circle{% else %}fa-exclamation-circle{% endif %} me-2"></i>
+                <div>
+                    <strong>{% if connection_status.status %}Banco conectado{% else %}Banco desconectado{% endif %}</strong>
+                    {% if not connection_status.status %}
+                    <div class="small">
+                        <a href="{{ url_for('select_database') }}" class="text-white">Configurar agora</a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estatísticas Rápidas -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-4">
+            <div class="card shadow hover-card h-100">
+                <div class="card-body text-center">
+                    <div class="stat-icon bg-primary text-white mx-auto mb-3">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h5 class="card-title">Bruto</h5>
+                    <h3 class="card-text" id="countBruto">--</h3>
+                    <p class="text-muted small">Registros cadastrados</p>
+                </div>
+                <div class="card-footer bg-light">
+                    <a href="{{ url_for('bruto_bp.index') }}" class="btn btn-sm btn-primary w-100">
+                        <i class="fas fa-arrow-right me-1"></i>Acessar
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="card shadow hover-card h-100">
+                <div class="card-body text-center">
+                    <div class="stat-icon bg-success text-white mx-auto mb-3">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
+                    <h5 class="card-title">Líquido</h5>
+                    <h3 class="card-text" id="countLiquido">--</h3>
+                    <p class="text-muted small">Registros cadastrados</p>
+                </div>
+                <div class="card-footer bg-light">
+                    <a href="{{ url_for('liquido_bp.index') }}" class="btn btn-sm btn-success w-100">
+                        <i class="fas fa-arrow-right me-1"></i>Acessar
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="card shadow hover-card h-100">
+                <div class="card-body text-center">
+                    <div class="stat-icon bg-info text-white mx-auto mb-3">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <h5 class="card-title">Região</h5>
+                    <h3 class="card-text" id="countRegiao">--</h3>
+                    <p class="text-muted small">Registros cadastrados</p>
+                </div>
+                <div class="card-footer bg-light">
+                    <a href="{{ url_for('regiao_bp.index') }}" class="btn btn-sm btn-info text-white w-100">
+                        <i class="fas fa-arrow-right me-1"></i>Acessar
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="card shadow hover-card h-100">
+                <div class="card-body text-center">
+                    <div class="stat-icon bg-warning text-dark mx-auto mb-3">
+                        <i class="fas fa-truck"></i>
+                    </div>
+                    <h5 class="card-title">Entregas</h5>
+                    <h3 class="card-text" id="countEntregas">--</h3>
+                    <p class="text-muted small">Registros cadastrados</p>
+                </div>
+                <div class="card-footer bg-light">
+                    <a href="{{ url_for('entregas_bp.index') }}" class="btn btn-sm btn-warning text-dark w-100">
+                        <i class="fas fa-arrow-right me-1"></i>Acessar
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recursos do Sistema -->
+    <div class="row mb-4">
+        <div class="col-12 mb-4">
+            <div class="card shadow">
+                <div class="card-header bg-light">
+                    <h4 class="mb-0"><i class="fas fa-star me-2"></i>Recursos do Sistema</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-4 mb-4">
+                            <div class="feature-icon bg-primary text-white rounded-circle mb-3">
+                                <i class="fas fa-database"></i>
+                            </div>
+                            <h5>Conexão Dinâmica</h5>
+                            <p class="text-muted">Conecte-se a qualquer banco Access (.accdb/.mdb) em qualquer localização, incluindo OneDrive.</p>
+                        </div>
+                        <div class="col-md-4 mb-4">
+                            <div class="feature-icon bg-success text-white rounded-circle mb-3">
+                                <i class="fas fa-edit"></i>
+                            </div>
+                            <h5>CRUD Completo</h5>
+                            <p class="text-muted">Cadastre, visualize, edite e exclua registros em todas as abas do sistema.</p>
+                        </div>
+                        <div class="col-md-4 mb-4">
+                            <div class="feature-icon bg-info text-white rounded-circle mb-3">
+                                <i class="fas fa-file-import"></i>
+                            </div>
+                            <h5>Importação de Dados</h5>
+                            <p class="text-muted">Importe dados de planilhas Excel para alimentar o banco de dados.</p>
+                        </div>
+                        <div class="col-md-4 mb-4">
+                            <div class="feature-icon bg-warning text-dark rounded-circle mb-3">
+                                <i class="fas fa-search"></i>
+                            </div>
+                            <h5>Filtros Avançados</h5>
+                            <p class="text-muted">Encontre rapidamente os dados que precisa com filtros personalizados.</p>
+                        </div>
+                        <div class="col-md-4 mb-4">
+                            <div class="feature-icon bg-danger text-white rounded-circle mb-3">
+                                <i class="fas fa-chart-pie"></i>
+                            </div>
+                            <h5>Visualização de Dados</h5>
+                            <p class="text-muted">Visualize seus dados em tabelas organizadas e intuitivas.</p>
+                        </div>
+                        <div class="col-md-4 mb-4">
+                            <div class="feature-icon bg-secondary text-white rounded-circle mb-3">
+                                <i class="fas fa-mobile-alt"></i>
+                            </div>
+                            <h5>Design Responsivo</h5>
+                            <p class="text-muted">Acesse o sistema de qualquer dispositivo, incluindo smartphones e tablets.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Acesso Rápido -->
+    <div class="row mb-4">
+        <div class="col-md-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header bg-light">
+                    <h4 class="mb-0"><i class="fas fa-bolt me-2"></i>Acesso Rápido</h4>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        <a href="{{ url_for('bruto_bp.index') }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-chart-line text-primary me-2"></i>Gerenciar Bruto
+                            </div>
+                            <span class="badge bg-primary rounded-pill">
+                                <i class="fas fa-arrow-right"></i>
+                            </span>
+                        </a>
+                        <a href="{{ url_for('liquido_bp.index') }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-chart-bar text-success me-2"></i>Gerenciar Líquido
+                            </div>
+                            <span class="badge bg-success rounded-pill">
+                                <i class="fas fa-arrow-right"></i>
+                            </span>
+                        </a>
+                        <a href="{{ url_for('regiao_bp.index') }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-map-marker-alt text-info me-2"></i>Gerenciar Região
+                            </div>
+                            <span class="badge bg-info rounded-pill">
+                                <i class="fas fa-arrow-right"></i>
+                            </span>
+                        </a>
+                        <a href="{{ url_for('entregas_bp.index') }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-truck text-warning me-2"></i>Gerenciar Entregas
+                            </div>
+                            <span class="badge bg-warning text-dark rounded-pill">
+                                <i class="fas fa-arrow-right"></i>
+                            </span>
+                        </a>
+                        <a href="{{ url_for('km_rodado_bp.index') }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-road text-danger me-2"></i>Gerenciar KM Rodado
+                            </div>
+                            <span class="badge bg-danger rounded-pill">
+                                <i class="fas fa-arrow-right"></i>
+                            </span>
+                        </a>
+                        <a href="{{ url_for('ocupacao_bp.index') }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-percentage text-secondary me-2"></i>Gerenciar Ocupação
+                            </div>
+                            <span class="badge bg-secondary rounded-pill">
+                                <i class="fas fa-arrow-right"></i>
+                            </span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header bg-light">
+                    <h4 class="mb-0"><i class="fas fa-tools me-2"></i>Ferramentas</h4>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-3">
+                        <a href="{{ url_for('select_database') }}" class="btn btn-lg btn-outline-primary">
+                            <i class="fas fa-database me-2"></i>Configurar Banco de Dados
+                        </a>
+                        <a href="{{ url_for('importacao') }}" class="btn btn-lg btn-outline-success">
+                            <i class="fas fa-file-import me-2"></i>Importar Dados
+                        </a>
+                        <button type="button" class="btn btn-lg btn-outline-info" id="btnTestarConexao">
+                            <i class="fas fa-sync-alt me-2"></i>Testar Conexão
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dica Humorística -->
+    <div class="card border-info shadow-sm mb-4">
+        <div class="card-body">
+            <div class="d-flex">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-robot text-info fa-3x"></i>
+                </div>
+                <div class="flex-grow-1 ms-3">
+                    <h5 class="card-title">Dica do Assistente</h5>
+                    <p class="card-text" id="dicaAssistente">
+                        Bancos de dados são como relacionamentos: precisam de manutenção regular e boa comunicação para funcionar bem. 
+                        Lembre-se de verificar sua conexão regularmente e fazer backups - seu "eu" do futuro agradecerá! 😉
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        // Array de dicas divertidas
+        const dicas = [
+            "Bancos de dados são como relacionamentos: precisam de manutenção regular e boa comunicação para funcionar bem. Lembre-se de verificar sua conexão regularmente e fazer backups - seu 'eu' do futuro agradecerá! 😉",
+            "Se os dados fossem pessoas, o Access seria aquele amigo que sempre está disponível, mas às vezes precisa de um cafezinho para acordar direito. ☕",
+            "Cadastrar dados é como arrumar o quarto: parece chato no começo, mas a organização facilita encontrar tudo depois. E não, jogar tudo embaixo da cama não é uma estratégia válida para nenhum dos dois! 🧹",
+            "Lembre-se: um banco de dados bem estruturado é como uma boa piada - tem timing perfeito e entrega exatamente o que você precisa no momento certo! 🎯",
+            "Importar dados é como fazer compras no supermercado: você sempre acaba trazendo mais do que planejava. Verifique seus dados antes de importar para evitar 'compras por impulso'! 🛒"
+        ];
+        
+        // Selecionar uma dica aleatória
+        $("#dicaAssistente").text(dicas[Math.floor(Math.random() * dicas.length)]);
+        
+        // Carregar estatísticas
+        carregarEstatisticas();
+        
+        // Evento de testar conexão
+        $("#btnTestarConexao").click(function() {
+            $.ajax({
+                url: '/test_connection',
+                type: 'GET',
+                beforeSend: function() {
+                    $("#btnTestarConexao").html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Testando...');
+                    $("#btnTestarConexao").prop('disabled', true);
+                },
+                success: function(response) {
+                    if (response.status) {
+                        showToast("Sucesso!", "Conexão com o banco de dados estabelecida com sucesso.", "success");
+                    } else {
+                        showToast("Atenção!", "Não foi possível conectar ao banco de dados: " + response.message, "warning");
+                    }
+                    
+                    // Atualizar status na página
+                    atualizarStatusConexao(response);
+                    
+                    // Recarregar estatísticas
+                    carregarEstatisticas();
+                },
+                error: function() {
+                    showToast("Erro!", "Ocorreu um erro ao testar a conexão.", "danger");
+                },
+                complete: function() {
+                    $("#btnTestarConexao").html('<i class="fas fa-sync-alt me-2"></i>Testar Conexão');
+                    $("#btnTestarConexao").prop('disabled', false);
+                }
+            });
+        });
+        
+        // Função para carregar estatísticas
+        function carregarEstatisticas() {
+            $.ajax({
+                url: '/get_statistics',
+                type: 'GET',
+                success: function(response) {
+                    if (response.status) {
+                        $("#countBruto").text(response.bruto || 0);
+                        $("#countLiquido").text(response.liquido || 0);
+                        $("#countRegiao").text(response.regiao || 0);
+                        $("#countEntregas").text(response.entregas || 0);
+                    } else {
+                        $("#countBruto, #countLiquido, #countRegiao, #countEntregas").text("--");
+                    }
+                },
+                error: function() {
+                    $("#countBruto, #countLiquido, #countRegiao, #countEntregas").text("--");
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+
+{% block title %}Região - Formulário - Sistema de Gestão Logística{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>
+            {% if registro %}
+            <i class="fas fa-edit me-2"></i>Editar Registro de Região
+            {% else %}
+            <i class="fas fa-plus-circle me-2"></i>Novo Registro de Região
+            {% endif %}
+        </h2>
+        <a href="{{ url_for('regiao_bp.index') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-1"></i>Voltar
+        </a>
+    </div>
+    
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">
+                {% if registro %}
+                <i class="fas fa-edit me-2"></i>Editar Dados
+                {% else %}
+                <i class="fas fa-plus-circle me-2"></i>Inserir Dados
+                {% endif %}
+            </h5>
+        </div>
+        <div class="card-body">
+            <form method="post" id="regiaoForm">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="tipo" class="form-label required-field">Tipo</label>
+                        <select class="form-select" id="tipo" name="tipo" required>
+                            <option value="" disabled selected>Selecione o tipo</option>
+                            {% for tipo in tipos %}
+                                <option value="{{ tipo }}" {% if registro and registro.tipo == tipo %}selected{% endif %}>{{ tipo }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="form-text">Tipo de registro (ex: REALIZADO)</div>
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        <label for="estado" class="form-label required-field">Estado</label>
+                        <select class="form-select" id="estado" name="estado" required>
+                            <option value="" disabled selected>Selecione o estado</option>
+                            {% for estado in estados %}
+                                <option value="{{ estado }}" {% if registro and registro.estado == estado %}selected{% endif %}>{{ estado }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="form-text">Estado (UF) do registro</div>
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        <label for="cd" class="form-label required-field">Centro de Distribuição</label>
+                        <select class="form-select" id="cd" name="cd" required>
+                            <option value="" disabled selected>Selecione o CD</option>
+                            {% for cd_item in cds %}
+                                <option value="{{ cd_item }}" {% if registro and registro.cd == cd_item %}selected{% endif %}>{{ cd_item }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="form-text">Centro de Distribuição</div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="data" class="form-label required-field">Data</label>
+                        <input type="date" class="form-control" id="data" name="data" 
+                               value="{{ registro.data.strftime('%Y-%m-%d') if registro else '' }}" required>
+                        <div class="form-text">Data do registro (mês e ano serão calculados automaticamente)</div>
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        <label for="regiao" class="form-label required-field">Região</label>
+                        <select class="form-select" id="regiao" name="regiao" required>
+                            <option value="" disabled selected>Selecione a região</option>
+                            {% for regiao_item in regioes %}
+                                <option value="{{ regiao_item }}" {% if registro and registro.regiao == regiao_item %}selected{% endif %}>{{ regiao_item }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="form-text">Região de peso</div>
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        <label for="tons" class="form-label">Toneladas</label>
+                        <input type="number" step="0.01" min="0" class="form-control" id="tons" name="tons" 
+                               value="{{ registro.tons if registro and registro.tons else '' }}">
+                        <div class="form-text">Peso em toneladas para a região</div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="tons_dev_c_mot" class="form-label">Toneladas Devolvidas C/ Motivo</label>
+                        <input type="number" step="0.01" min="0" class="form-control" id="tons_dev_c_mot" name="tons_dev_c_mot" 
+                               value="{{ registro.tons_dev_c_mot if registro and registro.tons_dev_c_mot else '' }}">
+                        <div class="form-text">Toneladas devolvidas com motivo</div>
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        <label for="tons_dev_s_mot" class="form-label">Toneladas Devolvidas S/ Motivo</label>
+                        <input type="number" step="0.01" min="0" class="form-control" id="tons_dev_s_mot" name="tons_dev_s_mot" 
+                               value="{{ registro.tons_dev_s_mot if registro and registro.tons_dev_s_mot else '' }}">
+                        <div class="form-text">Toneladas devolvidas sem motivo</div>
+                    </div>
+                </div>
+                
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                    <button type="reset" class="btn btn-secondary me-md-2">
+                        <i class="fas fa-undo me-1"></i>Limpar
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i>Salvar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div class="card mt-4">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0"><i class="fas fa-lightbulb me-2"></i>Dica</h5>
+        </div>
+        <div class="card-body">
+            <p class="mb-0">Ao cadastrar dados por região, você está criando um mapa logístico do seu negócio! 🗺️ Mês e ano são calculados automaticamente a partir da data selecionada, facilitando análises temporais.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
